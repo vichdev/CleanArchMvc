@@ -1,47 +1,53 @@
-﻿using CleanArchMvc.Domain.Entities;
+using CleanArchMvc.Domain.Entities;
 using CleanArchMvc.Domain.Interfaces;
 using CleanArchMvc.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace CleanArchMvc.Infra.Data.Repositories
+namespace CleanArchMvc.Infra.Data.Repositories;
+
+public class CategoryRepository : ICategoryRepository
 {
-    public class CategoryRepository : ICategoryRepository
+    ApplicationDbContext _context;
+    
+    public CategoryRepository(ApplicationDbContext context)
     {
-        ApplicationDbContext _categoryContext;
-        public CategoryRepository(ApplicationDbContext context)
-        {
-            _categoryContext = context;
-        }
+        _context = context;
+    }
+    
+    public async Task<IEnumerable<Category>> GetCategoriesAsync()
+    {
+        return await _context.Categories.ToListAsync();
+    }
 
-        public async Task<Category> CreateAsync(Category category)
-        {
-            _categoryContext.Add(category);
-            await _categoryContext.SaveChangesAsync();
-            return category;
-        }
+    public async Task<Category?> GetByIdAsync(int? id)
+    {
+        return await _context.Categories.FindAsync(id);
+    }
 
-        public async Task<IEnumerable<Category>> GetCategoriesAsync()
-        {
-            return await _categoryContext.Categories.ToListAsync();
-        }
+    public async Task<Category> CreateAsync(Category category)
+    {
+        _context.Categories.Add(category);
+        
+        await _context.SaveChangesAsync();
+        
+        return category;
+    }
 
-        public async Task<Category> GetCategoryByIdAsync(int? id)
-        {
-            return await _categoryContext.Categories.FindAsync(id);
-        }
+    public async Task<Category> UpdateAsync(Category category)
+    {
+        _context.Categories.Update(category);
+        
+        await _context.SaveChangesAsync();
+        
+        return category;
+    }
 
-        public async Task<Category> RemoveAsync(Category category)
-        {
-            _categoryContext.Remove(category);
-            await _categoryContext.SaveChangesAsync();
-            return category;
-        }
-
-        public async Task<Category> UpdateAsync(Category category)
-        {
-            _categoryContext.Update(category);
-            await _categoryContext.SaveChangesAsync();
-            return category;
-        }
+    public async Task<Category> DeleteAsync(Category category)
+    {
+        _context.Categories.Remove(category);
+        
+        await _context.SaveChangesAsync();
+        
+        return category;
     }
 }

@@ -1,37 +1,42 @@
 using CleanArchMvc.Domain.Entities;
+using CleanArchMvc.Domain.Validation;
 using FluentAssertions;
 
-namespace CleanArchMvc.Domain.Tests
+namespace CleanArchMvc.Domain.Tests;
+
+public class ProductUnitTest1
 {
-    public class ProductUnitTest1
+    [Fact(DisplayName = "Create Product with valid state")]
+    public void CreateProduct_WithValidParameters_ResultObjectValidState()
     {
-        [Fact]
-        public void CreateProduct_WithValidParameters_ResultObjectValidState()
-        {
-            Action action = () => new Category(1, "Category Name");
-            action.Should().NotThrow<CleanArchMvc.Domain.Validation.DomainExceptionValidation>();
-            action.Should().NotBeNull();
-        }
+        var action = () => new Product(1, "Product Name", "Product Description", 9.99m, 99, "image");
 
-        [Fact]
-        public void CreateProduct_WithNegativeIdParameter_DomainExceptionInvalidId()
-        {
-            Action action = () => new Category(-1, "Category Name");
-            action.Should().Throw<CleanArchMvc.Domain.Validation.DomainExceptionValidation>().WithMessage("Invalid Id value.");
-        }
-
-        [Fact]
-        public void CreateProduct_ShortNameParameter_DomainExceptionShortName()
-        {
-            Action action = () => new Category(1, "Ca");
-            action.Should().Throw<CleanArchMvc.Domain.Validation.DomainExceptionValidation>().WithMessage("Invalid Name. Name is too short.");
-        }
-
-        [Fact]
-        public void CreateProduct_WithNullNameParameter_DomainExceptionInvalidName()
-        {
-            Action action = () => new Category(1, null);
-            action.Should().Throw<CleanArchMvc.Domain.Validation.DomainExceptionValidation>().WithMessage("Invalid Name. Name is invalid.");
-        }
+        action.Should().NotThrow<DomainExceptionValidation>();
     }
+    
+    [Fact]
+    public void CreateProduct_WithNullImage_NoDomainException()
+    {
+        var action = () => new Product(1, "Product Name", "Product Description", 9.99m, 99, null);
+
+        action.Should().NotThrow<DomainExceptionValidation>();
+    }
+    
+    [Fact]
+    public void CreateProduct_WithNullImage_NoNullReferenceException()
+    {
+        var action = () => new Product("Product Name", "Product Description", 9.99m, 99, null);
+
+        action.Should().NotThrow<NullReferenceException>();
+    }
+
+    
+    [Fact]
+    public void CreateProduct_NegativeIdValue_DomainExceptionInvalidId()
+    {
+        var action = () => new Product(-1, "Product Name", "Product Description", 9.99m, 99, "image");
+
+        action.Should().Throw<DomainExceptionValidation>().WithMessage("Invalid Id value");
+    }
+
 }

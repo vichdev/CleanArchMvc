@@ -1,41 +1,35 @@
-﻿using CleanArchMvc.Domain.Validation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CleanArchMvc.Domain.Validation;
 
-namespace CleanArchMvc.Domain.Entities
+namespace CleanArchMvc.Domain.Entities;
+
+public sealed class Category : EntityBase
 {
-    public sealed class Category : Entity
+    public string Name { get; private set; }
+    
+    public ICollection<Product> Products { get; set; }
+    
+    public Category(int id, string name)
     {
-        public string Name { get; private set; }
-
-        public Category(string name) 
-        {
-            ValidateDomain(name);
-        }
-
-        public Category(int id, string name)
-        {
-            DomainExceptionValidation.When(id < 0, "Invalid Id value.");
-            Id = id;
-            ValidateDomain(name);
-        }
-
-        public ICollection<Product> Products { get; set; }
-
-        public void Update(string name)
-        {
-            ValidateDomain(name);
-        }
-
-        private void ValidateDomain(string name)
-        {
-            DomainExceptionValidation.When(string.IsNullOrEmpty(name), "Invalid Name. Name is invalid.");
-            DomainExceptionValidation.When(name.Length < 3, "Invalid Name. Name is too short.");
-        }
+        DomainExceptionValidation.When(id < 0, "Id must be greater than zero.");
+        Id = id;
+        Validate(name);
+    }
+    
+    public Category(string name)
+    {
+        Validate(name);
     }
 
- 
+    public void Update(Category category)
+    {
+        Validate(category.Name);
+    }
+    
+    private void Validate(string name)
+    {
+        DomainExceptionValidation.When(string.IsNullOrEmpty(name), "Name cannot be null or empty.");
+        DomainExceptionValidation.When(name.Length < 3, "Name must be at least 3 characters long.");
+        
+        Name = name;
+    }
 }

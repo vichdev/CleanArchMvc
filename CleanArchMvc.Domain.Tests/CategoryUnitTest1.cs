@@ -1,37 +1,53 @@
 using CleanArchMvc.Domain.Entities;
+using CleanArchMvc.Domain.Validation;
 using FluentAssertions;
 
-namespace CleanArchMvc.Domain.Tests
+namespace CleanArchMvc.Domain.Tests;
+
+public class CategoryUnitTest1
 {
-    public class CategoryUnitTest1
+    [Fact(DisplayName = "Create Category with valid state")]
+    public void CreateCategory_WithValidParameters_ResultObjectValidState()
     {
-        [Fact]
-        public void CreateCategory_WithValidParameters_ResultObjectValidState()
-        {
-            Action action = () => new Category(1, "Category Name");
-            action.Should().NotThrow<CleanArchMvc.Domain.Validation.DomainExceptionValidation>();
-            action.Should().NotBeNull();
-        }
+        var action = () => new Category(1, "Category Name");
 
-        [Fact]
-        public void CreateCategory_WithNegativeIdParameter_DomainExceptionInvalidId()
-        {
-            Action action = () => new Category(-1, "Category Name");
-            action.Should().Throw<CleanArchMvc.Domain.Validation.DomainExceptionValidation>().WithMessage("Invalid Id value.");
-        }
+        action.Should().NotThrow<DomainExceptionValidation>();
+    }
+    
+    [Fact(DisplayName = "Create Category with negative id throws exception")]
+    public void CreateCategory_NegativeIdValue_DomainExceptionInvalidId()
+    {
+        var action = () => new Category(-1, "Category Name");
 
-        [Fact]
-        public void CreateCategory_ShortNameParameter_DomainExceptionShortName()
-        {
-            Action action = () => new Category(1, "Ca");
-            action.Should().Throw<CleanArchMvc.Domain.Validation.DomainExceptionValidation>().WithMessage("Invalid Name. Name is too short.");
-        }
+        action.Should().Throw<DomainExceptionValidation>().WithMessage("Id must be greater than zero.");
+    }
+    
+    [Fact]
+    public void CreateCategory_EmptyName_DomainExceptionNameMustBeAtLeastThreeCharacters()
+    {
+        var action = () => new Category("Ca");
 
-        [Fact]
-        public void CreateCategory_WithNullNameParameter_DomainExceptionInvalidName()
+        action.Should().Throw<DomainExceptionValidation>().WithMessage("Name must be at least 3 characters long.");
+    }
+    
+    [Fact]
+    public void CreateCategory_EmptyName_DomainExceptionNameEmpty()
+    {
+        var action = () => new Category(1, string.Empty);
+
+        action.Should().Throw<DomainExceptionValidation>().WithMessage("Name cannot be null or empty.");
+    }
+
+    [Fact]
+    public void UpdateCategory_WithValidParameters_ResultObjectValidState()
+    {
+        var action = () =>
         {
-            Action action = () => new Category(1, null);
-            action.Should().Throw<CleanArchMvc.Domain.Validation.DomainExceptionValidation>().WithMessage("Invalid Name. Name is invalid.");
-        }
+            var category = new Category(1, "Category Name");
+            
+            category.Update(category);
+        };
+        
+        action.Should().NotThrow<DomainExceptionValidation>();
     }
 }
